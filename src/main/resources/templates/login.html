@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Login - Zarooriyaat</title>
+   <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+
+<body>
+   <div class="wrapper">
+      <div class="title">
+         Login
+      </div>
+      <!-- Bind form to the loginObject model -->
+      <form th:action="@{/login}" th:object="${loginObject}" th:method="post">
+         <div class="field">
+            <!-- Bind the username field -->
+            <input type="email" th:field="*{email}" required>
+            <label>Email Address</label>
+         </div>
+         <div class="field">
+            <!-- Bind the password field -->
+            <input type="password" th:field="*{password}" required>
+            <label>Password</label>
+         </div>
+         <div class="content">
+            <div class="checkbox">
+               <input type="checkbox" id="remember-me">
+               <label for="remember-me">Remember me</label>
+            </div>
+            <div class="pass-link">
+               <a href="#">Forgot password?</a>
+            </div>
+         </div>
+         <div class="field">
+            <input type="submit" value="Login">
+         </div>
+         <div class="signup-link">
+            Not a member? <a th:href="@{/signup}">Signup now!</a>
+         </div>
+      </form>
+      <div th:if="${error}">
+         <p style="color: red;" th:text="${error}"></p>
+      </div>
+   </div>
+</body>
+
+</html>
