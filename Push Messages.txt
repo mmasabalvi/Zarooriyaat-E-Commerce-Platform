@@ -1,6 +1,6 @@
 git init
 
----------------Use git add <filename> to track it in the staging area
+--------------pk---Use git add <filename> to track it in the staging area
 git add .
 
 ---------------Use git status to see staging area where different versions of file present
