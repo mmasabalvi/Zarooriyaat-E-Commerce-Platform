@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Registration Form - Zarooriyaat</title>
+    <link rel="stylesheet" th:href="@{/css/signup.css}">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Title section -->
+        <div class="title">Seller Registration</div>
+
+        <div class="content">
+            <!-- Registration form -->
+            <form th:action="@{/signup-seller}" th:object="${signupObject}" method="post">
+                <div class="user-details">
+                    <!-- Input for Full Name -->
+                    <div class="input-box">
+                        <span class="details">Full Name</span>
+                        <input type="text" th:field="*{fullName}" placeholder="Enter your name" required>
+                    </div>
+                    <!-- Input for Email -->
+                    <div class="input-box">
+                        <span class="details">Email</span>
+                        <input type="email" th:field="*{email}" placeholder="Enter your email" required>
+                    </div>
+                    <!-- Input for Phone Number -->
+                    <div class="input-box">
+                        <span class="details">Phone Number</span>
+                        <input type="text" th:field="*{phoneNumber}" placeholder="Enter your number" required>
+                    </div>
+                    <!-- Input for CNIC -->
+                    <div class="input-box">
+                        <span class="details">CNIC</span>
+                        <input type="text" th:field="*{cnic}" placeholder="*****-******-*" required>
+                    </div>
+                    <!-- Input for Password -->
+                    <div class="input-box">
+                        <span class="details">Password</span>
+                        <input type="password" th:field="*{password}" placeholder="Enter your password" required>
+                    </div>
+                </div>
+
+                <!-- Error message display -->
+                <div th:if="${errorMessage}" class="error-message">
+                    <p th:text="${errorMessage}"></p>
+                </div>
+
+                <!-- Submit button -->
+                <div class="button">
+                    <input type="submit" value="Register">
+                </div>
+
+                <div class="signup-link">
+                    Already a Seller? <a th:href="@{/login-seller}">Login to your Dashboard now!</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

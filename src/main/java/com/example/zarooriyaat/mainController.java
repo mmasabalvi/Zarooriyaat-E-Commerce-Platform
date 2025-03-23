@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.zarooriyaat.categoryobj.categoryObject;
 import com.example.zarooriyaat.productListobj.productListObject;
+import com.example.zarooriyaat.repository.SellerSignupRepository;
 import com.example.zarooriyaat.repository.SignupRepository;
 import com.example.zarooriyaat.service.CartService;
 import com.example.zarooriyaat.service.OrderService;
@@ -25,6 +26,7 @@ import com.example.zarooriyaat.service.PaymentByPaypal;
 import com.example.zarooriyaat.service.PaymentContext;
 import com.example.zarooriyaat.service.ProductService;
 import com.example.zarooriyaat.signupobj.SignupEntity;
+import com.example.zarooriyaat.signupsellerobj.SellerSignupEntity;
 
 @Controller
 public class mainController {
@@ -38,6 +40,9 @@ public class mainController {
     @Autowired
     private OrderService orderService;
     
+    @Autowired
+    private SellerSignupRepository sellerSignupRepository;
+        
     @Autowired
     private CartService cartService;
     private List<Long> cart = new ArrayList<>();
@@ -248,4 +253,90 @@ public class mainController {
 
 
 
+    //Adding Seller Logics
+
+    // Display Seller Signup Page
+    @GetMapping("/signup-seller")
+    public String showSellerSignUpPage(Model model) {
+        model.addAttribute("signupObject", new SellerSignupEntity());
+        return "signupSeller"; // Refers to templates/signupSeller.html
+    }
+
+    // Handle Seller Signup Form Submission
+    @PostMapping("/signup-seller")
+    public String handleSellerSignUp(@ModelAttribute("signupObject") SellerSignupEntity signupObj, Model model) {
+        try {
+            // Save the entity to the database
+            sellerSignupRepository.save(signupObj);
+
+            // Redirect to login page after successful signup
+            return "redirect:/login-seller";
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the error for debugging
+            model.addAttribute("errorMessage", "An error occurred during signup.");
+            return "signupSeller"; // Return to signupSeller page with error message
+        }
+    }
+
+    @GetMapping("/login-seller")
+    public String showSellerLoginPage(Model model) {
+        model.addAttribute("loginObject", new SellerSignupEntity()); // Make sure this matches your model name in the
+                                                                     // Thymeleaf
+        return "loginSeller"; // Correctly point to the seller login template
+    }
+
+    @PostMapping("/login-seller")
+    public String handleSellerLogin(@ModelAttribute("loginObject") SellerSignupEntity loginDto,
+            RedirectAttributes redirectAttributes) {
+        String email = loginDto.getEmail();
+        String password = loginDto.getPassword();
+
+        // Authenticate the user
+        Optional<SellerSignupEntity> user = sellerSignupRepository.findByEmailAndPassword(email, password);
+
+        if (user.isPresent()) {
+            // Login successful
+            redirectAttributes.addFlashAttribute("username", user.get().getFullName());
+            return "redirect:/dashboard-seller"; // Redirect to /categories
+        } else {
+            // Login failed
+            redirectAttributes.addFlashAttribute("error", "Invalid email or password");
+            return "redirect:/signup-seller"; // Redirect to login with error
+        }
+    }    
+
+    @GetMapping("/dashboard-seller")
+    public String showSellerDashboard(Model model) {
+        // Fetch inventory data for the seller (this will be a list of products)
+        List<productListObject> inventory = productService.getInventoryForSeller();
+        
+        // Add the inventory data to the model
+        model.addAttribute("inventory", inventory);
+        
+        // Return the view for the seller dashboard
+        return "sellerDashboard"; // This points to your Thymeleaf template
+    }
+    
+    @GetMapping("/search")
+    public String searchProducts(@RequestParam("query") String query, Model model) {
+        // Log the query for debugging
+        System.out.println("Search query: " + query);
+
+        // Search products using the service layer
+        List<productListObject> searchResults = productService.searchProducts(query);
+
+        // Debugging: Log the results
+        if (searchResults.isEmpty()) {
+            System.out.println("No products found for query: " + query);
+        } else {
+            searchResults.forEach(product -> System.out.println("Found product: " + product.getName()));
+        }
+
+        // Add search results to the model
+        model.addAttribute("products", searchResults);
+
+        // Return the view (productList.html)
+        return "productList";
+    }    
+    
 }
