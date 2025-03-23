@@ -1,0 +1,16 @@
+git init
+
+---------------Use git add <filename> to track it in the staging area
+git add .
+
+---------------Use git status to see staging area where different versions of file present
+
+git commit -m "minor fixes"
+
+git remote add origin https://github.com/mahadrehmann/Lenify.git
+
+git push -u origin main
+
+git pull origin main --allow-unrelated-histories
+
+
