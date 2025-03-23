@@ -3,12 +3,14 @@ package com.example.zarooriyaat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -16,6 +18,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.zarooriyaat.categoryobj.categoryObject;
 import com.example.zarooriyaat.productListobj.productListObject;
 import com.example.zarooriyaat.repository.SignupRepository;
+import com.example.zarooriyaat.service.CartService;
+import com.example.zarooriyaat.service.OrderService;
+import com.example.zarooriyaat.service.PaymentByCreditCard;
+import com.example.zarooriyaat.service.PaymentByPaypal;
+import com.example.zarooriyaat.service.PaymentContext;
 import com.example.zarooriyaat.service.ProductService;
 import com.example.zarooriyaat.signupobj.SignupEntity;
 
@@ -28,7 +35,16 @@ public class mainController {
     private SignupRepository signupRepository;
     @Autowired
     private ProductService productService;
+    @Autowired
+    private OrderService orderService;
     
+    @Autowired
+    private CartService cartService;
+    private List<Long> cart = new ArrayList<>();
+
+
+
+
     // main page
     @GetMapping("/main")
     public String showMainPage() {
@@ -130,6 +146,106 @@ public class mainController {
 
         return "productList";
     }
+
+        // Product View Mapping
+    @GetMapping("/productView/{id}")
+    public String showProductPage(@PathVariable Long id, Model model) {
+        // Retrieve product details from the database by name
+        // productListObject product = productService.getProductByName(id);
+        productListObject product = productService.getProductById(id);
+
+        if (product == null) {
+            // If the product is not found, redirect to an error page or handle gracefully
+            model.addAttribute("error", "Product not found");
+            return "error"; // Refers to a generic error page
+        }
+
+        // Pass product details to the model
+        model.addAttribute("product", product);
+
+        return "productView"; // Refers to templates/productView.html
+    }
+
+    // Add to Cart Endpoint
+    @PostMapping("/addToCart")
+    public String addToCart(@RequestParam("productId") Long productId, RedirectAttributes redirectAttributes) {
+        cart.add(productId); // Add product ID to the cart
+        redirectAttributes.addFlashAttribute("message", "Item added to cart successfully!");
+
+        return "redirect:/productList"; // Redirect to product list page
+    }    
+
+
+    @GetMapping("/cart")
+    public String viewCart(Model model) {
+        List<productListObject> cartItems = cart.stream()
+                .map(productService::getProductById)
+                .collect(Collectors.toList());
+
+        double totalPrice = cartService.calculateTotalPrice(cartItems);
+
+        model.addAttribute("cartItems", cartItems);
+        model.addAttribute("totalPrice", totalPrice);
+        return "cart";
+    }
+
+    // CHECKOUT PAGE
+    @GetMapping("/checkout")
+    public String showCheckoutPage(Model model) {
+        List<productListObject> cartItems = cart.stream()
+                .map(productService::getProductById)
+                .collect(Collectors.toList());
+
+        double totalPrice = cartService.calculateTotalPrice(cartItems);
+
+        List<String> paymentMethods = List.of("Credit Card", "PayPal");
+
+        model.addAttribute("cartItems", cartItems);
+        model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("paymentMethods", paymentMethods);
+
+        return "checkout"; // Refers to templates/checkout.html
+    }
+
+    @PostMapping("/process-payment")
+    public String processPayment(
+            @RequestParam("paymentMethod") String paymentMethod,
+            @RequestParam("fullName") String fullName,
+            @RequestParam("phone") String phone,
+            @RequestParam("address") String address,
+            Model model) {
+
+        PaymentContext paymentContext = new PaymentContext();
+        double totalPrice = cartService.calculateTotalPrice(cart.stream()
+                .map(productService::getProductById)
+                .collect(Collectors.toList()));
+
+        switch (paymentMethod) {
+            case "Credit Card":
+                paymentContext.setPaymentStrategy(new PaymentByCreditCard());
+                break;
+            case "PayPal":
+                paymentContext.setPaymentStrategy(new PaymentByPaypal());
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported payment method: " + paymentMethod);
+        }
+
+        String paymentResult = paymentContext.executePayment(totalPrice);
+
+        // Save cart items as order
+        orderService.saveOrder(cart.stream().map(productService::getProductById).collect(Collectors.toList()));
+
+        // Clear cart
+        cart.clear();
+
+        model.addAttribute("paymentResult", paymentResult);
+        model.addAttribute("message", "Order placed successfully!");
+
+        return "payment-success"; // Redirect to the confirmation page
+
+    }
+
 
 
 }
