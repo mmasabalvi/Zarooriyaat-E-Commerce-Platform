@@ -7,7 +7,7 @@ git add .
 
 git commit -m "minor fixes"
 
-git remote add origin https://github.com/mahadrehmann/Lenify.git
+git remote add origin https://github.com/mmasabalvi/Zarooriyaat-E-Commerce-Platform.git
 
 git push -u origin main
 
