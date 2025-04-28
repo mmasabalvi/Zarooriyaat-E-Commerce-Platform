@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product Form - Zarooriyaat</title>
+    <link rel="stylesheet" th:href="@{/css/signup.css}">
+</head>
+<body>
+    <div class="container">
+        <!-- Title section -->
+        <div class="title">Add Product</div>
+
+        <div class="content">
+            <!-- Add Product form -->
+            <form th:action="@{/dashboard-seller/add-product}" th:object="${product}" method="post">
+                <div class="user-details">
+                    <!-- Input for Product Name -->
+                    <div class="input-box">
+                        <span class="details">Product Name</span>
+                        <input type="text" th:field="*{name}" placeholder="Enter product name" required>
+                    </div>
+                    <!-- Input for Brand -->
+                    <div class="input-box">
+                        <span class="details">Brand</span>
+                        <input type="text" th:field="*{brand}" placeholder="Enter brand name">
+                    </div>
+                    <!-- Input for Image URL -->
+                    <div class="input-box">
+                        <span class="details">Image URL</span>
+                        <input type="text" th:field="*{imageUrl}" placeholder="Enter image URL">
+                    </div>
+                    <!-- Input for Stock Status -->
+                    <div class="input-box">
+                        <span class="details">Stock Quantity</span>
+                        <input type="text" th:field="*{stockStatus}" placeholder="Enter Stock" required>
+                    </div>
+                    <!-- Input for Selling Price -->
+                    <div class="input-box">
+                        <span class="details">Selling Price</span>
+                        <input type="number" th:field="*{sellingPrice}" placeholder="Enter selling price" required step="0.01">
+                    </div>
+                    <!-- Input for Original Price -->
+                    <div class="input-box">
+                        <span class="details">Original Price</span>
+                        <input type="number" th:field="*{originalPrice}" placeholder="Enter original price" step="0.01">
+                    </div>
+                    <!-- Input for Category -->
+                    <div class="input-box">
+                        <span the="details">Category</span>
+                        <input type="text" th:field="*{category}" placeholder="Enter category">
+                    </div>
+                    <!-- Input for Description -->
+                    <div class="input-box">
+                        <span class="details">Description</span>
+                        <textarea th:field="*{description}" placeholder="Enter product description"></textarea>
+                    </div>
+                </div>
+
+                <!-- Error message display -->
+                <div th:if="${errorMessage}" class="error-message">
+                    <p th:text="${errorMessage}"></p>
+                </div>
+
+                <!-- Submit button -->
+                <div class="button">
+                    <input type="submit" value="Add Product">
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.zarooriyaat.categoryobj.categoryObject;
+import com.example.zarooriyaat.productAddobj.product;
 import com.example.zarooriyaat.productListobj.productListObject;
+import com.example.zarooriyaat.repository.ProductAddRepository;
 import com.example.zarooriyaat.repository.SellerSignupRepository;
 import com.example.zarooriyaat.repository.SignupRepository;
 import com.example.zarooriyaat.service.CartService;
@@ -27,6 +29,7 @@ import com.example.zarooriyaat.service.PaymentContext;
 import com.example.zarooriyaat.service.ProductService;
 import com.example.zarooriyaat.signupobj.SignupEntity;
 import com.example.zarooriyaat.signupsellerobj.SellerSignupEntity;
+
 
 @Controller
 public class mainController {
@@ -47,7 +50,8 @@ public class mainController {
     private CartService cartService;
     private List<Long> cart = new ArrayList<>();
 
-
+    @Autowired
+    private ProductAddRepository productAddRepository;
 
 
     // main page
@@ -315,6 +319,23 @@ public class mainController {
         
         // Return the view for the seller dashboard
         return "sellerDashboard"; // This points to your Thymeleaf template
+    }
+
+    @GetMapping("/dashboard-seller/add-product")
+    public String showAddProductForm(Model model) {
+        model.addAttribute("product", new product());
+
+        // check if produt already esixts
+
+        // else
+        return "addProduct";
+    }
+
+    @PostMapping("/dashboard-seller/add-product")
+    public String handleAddProduct(@ModelAttribute product product, RedirectAttributes redirectAttributes) {
+        productAddRepository.save(product);
+        redirectAttributes.addFlashAttribute("message", "Product added successfully!");
+        return "redirect:/dashboard-seller";
     }
     
     @GetMapping("/search")
