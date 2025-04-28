@@ -359,5 +359,11 @@ public class mainController {
         // Return the view (productList.html)
         return "productList";
     }    
+
+    @GetMapping("/dashboard-customer")
+    public String showCustomerDashboard(Model model) {
+        model.addAttribute("userName", "Customer Name"); // Replace with actual logic
+        return "customerDashboard"; // Map to the Thymeleaf template name
+    }
     
 }
