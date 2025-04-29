@@ -57,7 +57,7 @@ public class Order {
     public double getTotalPrice() {
         return totalPrice;
     }
-
+int x =5;
     public void setTotalPrice(double totalPrice) {
         this.totalPrice = totalPrice;
     }
