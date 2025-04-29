@@ -50,4 +50,6 @@ public class Review {
     public void setReviewDate(LocalDate reviewDate) {
         this.reviewDate = reviewDate;
     }
+
+    int x = 5;
 }
