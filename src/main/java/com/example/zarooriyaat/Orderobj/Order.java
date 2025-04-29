@@ -55,7 +55,7 @@ public class Order {
     public double getTotalPrice() {
         return totalPrice;
     }
-
+int x =5;
     public void setTotalPrice(double totalPrice) {
         this.totalPrice = totalPrice;
     }
@@ -63,7 +63,7 @@ public class Order {
     public LocalDateTime getOrderDate() {
         return orderDate;
     }
-
+int z =5;
     public void setOrderDate(LocalDateTime orderDate) {
         this.orderDate = orderDate;
     }
