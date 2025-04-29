@@ -11,8 +11,6 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int orderId; // Unique ID for the order
 
-
-
     @Column(nullable = false)
     private Long productId; // ID of the product in the order
 
