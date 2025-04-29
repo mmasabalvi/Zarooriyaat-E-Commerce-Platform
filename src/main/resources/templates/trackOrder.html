@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Track Your Order</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #444;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+
+        .status {
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .status.completed {
+            color: green;
+        }
+
+        .status.pending {
+            color: orange;
+        }
+
+        .status.canceled {
+            color: red;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                font-size: 14px;
+            }
+
+            table th, table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Track Your Order</h1>
+        
+        <!-- Section to display current orders -->
+        <div class="current-orders">
+            <h2>Current Orders</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${order.orderId}"></td>
+                        <td th:text="${order.productId}"></td>
+                        <td th:text="${order.quantity}"></td>
+                        <td th:text="${order.totalPrice} + ' $'"></td>
+                        <td th:text="${order.orderDate}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section to track a specific order -->
+        <div class="track-order-form">
+            <h2>Enter Order ID to Track</h2>
+            <form th:action="@{/dashboard-customer/manage-products/track-order}" method="post">
+                <label for="orderId">Order ID:</label>
+                <input type="text" id="orderId" name="orderId" placeholder="Enter Order ID" required>
+                <button type="submit">Track Order</button>
+            </form>
+        </div>
+        <div class="tracking-details" th:if="${trackingDetails}">
+            <h3>Tracking Information</h3>
+            <p th:text="${trackingDetails}"></p>
+        </div>        
+    </div>
+</body>
+</html>

@@ -5,7 +5,7 @@ git add .
 
 ---------------Use git status to see staging area where different versions of file present
 
-git commit -m "Added Customer Dashboard"
+git commit -m "Added Customer Product Management"
 
 git remote add origin https://github.com/mmasabalvi/Zarooriyaat-E-Commerce-Platform.git
 

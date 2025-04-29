@@ -27,6 +27,7 @@ import com.example.zarooriyaat.service.PaymentByCreditCard;
 import com.example.zarooriyaat.service.PaymentByPaypal;
 import com.example.zarooriyaat.service.PaymentContext;
 import com.example.zarooriyaat.service.ProductService;
+import com.example.zarooriyaat.service.ReviewService;
 import com.example.zarooriyaat.signupobj.SignupEntity;
 import com.example.zarooriyaat.signupsellerobj.SellerSignupEntity;
 
@@ -52,6 +53,9 @@ public class mainController {
 
     @Autowired
     private ProductAddRepository productAddRepository;
+
+    @Autowired
+    private ReviewService reviewService;
 
 
     // main page
@@ -365,5 +369,128 @@ public class mainController {
         model.addAttribute("userName", "Customer Name"); // Replace with actual logic
         return "customerDashboard"; // Map to the Thymeleaf template name
     }
+
+    @GetMapping("/dashboard-customer/manage-products")
+    public String showOrderHistoryPage(Model model) {
+        model.addAttribute("userName", "Mahad"); // Replace with actual user logic
+
+        List<com.example.zarooriyaat.Orderobj.Order> orders = orderService.getAllOrders(); // Fetch all orders
+        model.addAttribute("orders", orders); // Add orders to the model
+        return "manageProducts"; // Refers to templates/order-history.html
+    }
+
+    @GetMapping("/dashboard-customer/manage-products/review-product")
+    public String reviewProductPage(Model model) {
+        // Fetch past orders
+        List<com.example.zarooriyaat.Orderobj.Order> pastOrders = orderService.getAllOrders(); // Fetch all orders
+        model.addAttribute("orders", pastOrders);
+        return "reviewProduct"; // Map to Thymeleaf template
+    }
     
+    @PostMapping("/dashboard-customer/manage-products/review-product")
+    public String submitProductReview(@RequestParam("productId") Long productId,
+                                      @RequestParam("rating") int rating,
+                                      Model model) {
+        // Validate rating
+        if (!reviewService.validateRating(rating)) { // Use instance to call the method
+            model.addAttribute("error", "Invalid rating. Please provide a value between 1 and 5.");
+            return "reviewProduct";
+        }
+
+        // Submit the review
+        boolean success = reviewService.submitReview(productId, rating); // Use instance to call the method
+
+        if (success) {
+            model.addAttribute("success", "Review submitted successfully!");
+        } else {
+            model.addAttribute("error", "Failed to submit review. Invalid product ID.");
+        }
+
+        // Fetch past orders and update the model
+        List<com.example.zarooriyaat.Orderobj.Order> pastOrders = orderService.getAllOrders(); // Fetch all orders
+        model.addAttribute("orders", pastOrders);
+
+        return "redirect:/dashboard-customer/manage-products"; // Return the updated page
+    }    
+
+    // Load the track order page with current orders
+    @GetMapping("/dashboard-customer/manage-products/track-order")
+    public String trackOrderPage(Model model) {
+        // Add current orders to the model
+        List<com.example.zarooriyaat.Orderobj.Order> currentOrders = orderService.getAllOrders(); // Fetch all orders
+        model.addAttribute("currentOrders", currentOrders);
+
+        return "trackOrder"; // Map to Thymeleaf template
+    }
+    
+    // Handle form submission to track a specific order
+    @PostMapping("/dashboard-customer/manage-products/track-order")
+    public String processTrackOrder(@RequestParam("orderId") Long orderId, Model model) {
+        // Logic to track the order based on orderId
+        // String trackingDetails = trackingService.getTrackingDetails(orderId);
+        String trackingDetails = "Your Order is in transit";
+
+        // Add tracking details and current orders to the model
+        model.addAttribute("trackingDetails", trackingDetails);
+        List<com.example.zarooriyaat.Orderobj.Order> currentOrders = orderService.getAllOrders(); // Fetch all orders
+
+        model.addAttribute("currentOrders", currentOrders);
+
+        return "trackOrder"; // Return the same page with updated tracking details
+    }
+
+    @GetMapping("/dashboard-customer/manage-products/return-product")
+    public String returnProduct() {
+        // Logic for returning product
+        return "returnProduct"; // Map to the corresponding Thymeleaf template
+    }    
+    
+    // Mapping for displaying the manage account settings page
+    @GetMapping("/dashboard-customer/manage-account-settings")
+    public String manageAccountSettings(Model model) {
+        // Ensure the user is logged in
+        if (loggedInUserEmail == null) {
+            return "redirect:/login"; // Redirect to login if not authenticated
+        }
+
+        System.out.println("Using stored email: " + loggedInUserEmail); // Debugging
+        Optional<SignupEntity> customer = signupRepository.findByEmail(loggedInUserEmail);
+        if (customer.isPresent()) {
+            model.addAttribute("customerObject", customer.get()); // Add customer details to the model
+        } else {
+            model.addAttribute("errorMessage", "User not found!"); // Handle case where user is not found
+        }
+
+        return "updateForm"; // Map to the updated form
+    }
+
+    @PostMapping("/dashboard-customer/manage-account-settings")
+    public String updateAccountSettings(@ModelAttribute("customerObject") SignupEntity customer,
+            RedirectAttributes redirectAttributes) {
+        // Ensure the entity is fetched from the database using the stored email or id
+        SignupEntity existingCustomer = signupRepository.findByEmail(customer.getEmail()).orElse(null);
+
+        if (existingCustomer != null) {
+            // If an existing customer is found, update the details
+            existingCustomer.setFullName(customer.getFullName());
+            existingCustomer.setPassword(customer.getPassword());
+            existingCustomer.setPhoneNumber(customer.getPhoneNumber());
+
+            try {
+                // Save and flush the updated entity
+                signupRepository.saveAndFlush(existingCustomer);
+                redirectAttributes.addFlashAttribute("successMessage", "Account settings updated successfully!");
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Error updating account settings. Please try again.");
+            }
+        } else {
+            // Handle case if the customer doesn't exist, though it shouldn't happen
+            redirectAttributes.addFlashAttribute("errorMessage", "Customer not found.");
+        }
+
+        return "redirect:/dashboard-customer/manage-account-settings"; // Redirect back to the manage account page
+    }
+
+
 }
